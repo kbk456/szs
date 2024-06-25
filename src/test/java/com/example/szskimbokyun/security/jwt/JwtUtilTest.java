@@ -3,17 +3,10 @@ package com.example.szskimbokyun.security.jwt;
 import com.example.szskimbokyun.service.dto.CustomUserInfoDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.security.Key;
-import java.util.Date;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
 
 class JwtUtilTest {
 
@@ -31,7 +24,7 @@ class JwtUtilTest {
         CustomUserInfoDto member = new CustomUserInfoDto();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
-        member.setName("동탁");
+        member.setName("동탁 ");
 
         String token = jwtUtil.createAccessToken(member);
         System.out.println(token);
@@ -53,7 +46,7 @@ class JwtUtilTest {
         CustomUserInfoDto member = new CustomUserInfoDto();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
-        member.setName("John Doe");
+        member.setName("동탁");
 
         String token = jwtUtil.createAccessToken(member);
         assertTrue(jwtUtil.validateToken(token));
@@ -64,7 +57,7 @@ class JwtUtilTest {
         CustomUserInfoDto member = new CustomUserInfoDto();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
-        member.setName("John Doe");
+        member.setName("동탁");
 
         String token = jwtUtil.createAccessToken(member);
         Long userId = jwtUtil.getUserId(token);
