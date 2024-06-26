@@ -1,12 +1,26 @@
 package com.example.szskimbokyun.controller;
 
+import com.example.szskimbokyun.controller.dto.TaxResponse;
+import com.example.szskimbokyun.domain.Income;
+import com.example.szskimbokyun.domain.Tax;
+import com.example.szskimbokyun.repository.IncomeRepository;
+import com.example.szskimbokyun.repository.TaxRepository;
 import com.example.szskimbokyun.service.MemberService;
 import com.example.szskimbokyun.service.TaxService;
+import com.example.szskimbokyun.service.dto.IncomeDeduction;
+import com.example.szskimbokyun.service.dto.IncomeDto;
+import com.example.szskimbokyun.service.dto.ScrapRequestDTO;
+import com.example.szskimbokyun.service.dto.ScrapResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.text.DecimalFormat;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/szs")
@@ -14,22 +28,112 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "세금", description = "")
 public class TaxController {
 
-    private final MemberService memberService;
+    private final TaxService taxService;
 
-    private final TaxService taxService; ;
+    private final IncomeRepository incomeRepository;
+
+    private final TaxRepository taxRepository;
 
     @Operation(summary = "스크래핑")
     @PostMapping("/scrap")
-    public ResponseEntity scrap(){
-        taxService
+    public ResponseEntity<String> scrap() {
+        ScrapRequestDTO requestDTO = new ScrapRequestDTO();
+        requestDTO.setName("동탁");
+        requestDTO.setRegNo("921108-1582816");
+        ScrapResponseDTO scrap = taxService.scrap(requestDTO);
 
-        return ResponseEntity.ok("");
+        BigDecimal totalDeduction = taxService.getTotalDeduction(scrap);
+        String name = scrap.getData().getName();
+        long totalIncome = scrap.getData().getTotalIncome();
+        String taxDeduction = scrap.getData().getIncomeDeduction().getTaxDeduction();
+
+        IncomeDto incomeDto = new IncomeDto();
+        incomeDto.setTotalIncome(String.valueOf(totalIncome));
+        incomeDto.setTaxDeduction(taxDeduction);
+        incomeDto.setTotalDeduction(String.valueOf(totalDeduction));
+        incomeDto.setName(name);
+
+        taxService.save(incomeDto);
+
+        return ResponseEntity.ok("저장성공");
     }
 
     @Operation(summary = "결정세액")
     @GetMapping("/refund")
-    public ResponseEntity refund(){
+    public ResponseEntity<TaxResponse> refund(){
 
-        return ResponseEntity.ok("");
+        String name = "동탁";
+
+        Optional<Income> income = incomeRepository.findByName(name);
+
+        if (income.isPresent()){
+            Income income1 = income.get();
+            
+            String totalIncome = income1.getTotalIncome();
+            
+            String taxDeduction = income1.getTaxDeduction();
+
+            String totalDeduction = income1.getTotalDeduction();
+
+            // 종합소득금액
+            BigDecimal totalIncomeBig = new BigDecimal(totalIncome);
+
+            // 세액공제
+            BigDecimal taxDeductionBig = new BigDecimal(taxDeduction.replaceAll(",",""));
+
+            // 소득공제
+            BigDecimal totalDeductionBig = new BigDecimal(totalDeduction.replaceAll(",",""));
+
+            BigDecimal subtract = totalIncomeBig.subtract(totalDeductionBig);
+
+            // 과세표준
+            BigDecimal taxBase = subtract.setScale(0, BigDecimal.ROUND_HALF_DOWN);
+
+            // 과세표준 으로 세율 조회
+            Optional<Tax> taxInfo = taxRepository.findTaxesInRange(taxBase.intValue());
+            System.out.println("taxBase: "+ taxBase);
+            if (taxInfo.isPresent()){
+                // 추가세
+                int addTax = taxInfo.get().getAddTax();
+
+                // 기본세율
+                int basicTaxRate = taxInfo.get().getBasicTaxRate();
+
+                int taxBaseMin = taxInfo.get().getTaxBaseMin();
+                int taxBaseMax = taxInfo.get().getTaxBaseMax();
+
+                // 과세 표준 - taxBaseMin
+                BigDecimal subtract1 = taxBase.subtract(BigDecimal.valueOf(taxBaseMin));
+                BigDecimal bigDecimal = subtract1.setScale(0, BigDecimal.ROUND_HALF_DOWN);
+
+                // basicTaxRate -> %
+                double basicTaxRate1 = basicTaxRate / 100.0;
+
+                System.out.println("subtract1"+subtract1);
+                // subtract1 * basicTaxRate1
+                BigDecimal result = subtract1.multiply(BigDecimal.valueOf(basicTaxRate1));
+                System.out.println("Result: " + result); // 결과 출력
+                BigDecimal bigDecimal1 = result.setScale(0, BigDecimal.ROUND_HALF_DOWN);
+                System.out.println("bigDecimal1:"+bigDecimal1);
+
+                // bigDecimal1 + addTax
+                BigDecimal taxCalc = bigDecimal1.add(BigDecimal.valueOf(addTax));
+
+                //산출세액 taxCalc - taxDeductionBig(세액공제)
+
+                BigDecimal 결정세액 = taxCalc.subtract(taxDeductionBig);
+
+                System.out.println("결정세액"+결정세액);
+
+                DecimalFormat df = new DecimalFormat("#,##0");
+                String formattedTaxAmount = df.format(결정세액);
+
+                TaxResponse taxResponse = new TaxResponse();
+                taxResponse.set결정세액(formattedTaxAmount);
+                System.out.println("결정세액: " + formattedTaxAmount);
+                return ResponseEntity.ok(taxResponse);
+            }
+        }
+        return null;
     }
 }

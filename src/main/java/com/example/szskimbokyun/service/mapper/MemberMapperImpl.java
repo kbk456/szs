@@ -26,9 +26,9 @@ public class MemberMapperImpl implements MemberMapper {
 
     @Override
     public MemberDto toDto(Member entity) {
-        MemberDto signUpDto = new MemberDto();
-        signUpDto.setName(entity.getName());
-        return signUpDto;
+        MemberDto memberDto = new MemberDto();
+        memberDto.setName(entity.getName());
+        return memberDto;
     }
 
     @Override
