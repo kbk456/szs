@@ -91,7 +91,7 @@ public class TaxController {
 
             // 과세표준 으로 세율 조회
             Optional<Tax> taxInfo = taxRepository.findTaxesInRange(taxBase.intValue());
-            System.out.println("taxBase: "+ taxBase);
+
             if (taxInfo.isPresent()){
                 // 추가세
                 int addTax = taxInfo.get().getAddTax();
@@ -99,37 +99,30 @@ public class TaxController {
                 // 기본세율
                 int basicTaxRate = taxInfo.get().getBasicTaxRate();
 
+                // 과세표준 최소값
                 int taxBaseMin = taxInfo.get().getTaxBaseMin();
 
-                // 과세 표준 - taxBaseMin
+                // 과세 표준 - 과세표준 최소값
                 BigDecimal subtract1 = taxBase.subtract(BigDecimal.valueOf(taxBaseMin));
-                BigDecimal bigDecimal = subtract1.setScale(0, BigDecimal.ROUND_HALF_DOWN);
+                BigDecimal subtract2 = subtract1.setScale(0, BigDecimal.ROUND_HALF_DOWN);
 
-                // basicTaxRate -> %
+                // 기본세율 % 로 변환
                 double basicTaxRate1 = basicTaxRate / 100.0;
 
-                System.out.println("subtract1"+subtract1);
-                // subtract1 * basicTaxRate1
-                BigDecimal result = bigDecimal.multiply(BigDecimal.valueOf(basicTaxRate1));
-                System.out.println("Result: " + result); // 결과 출력
-                BigDecimal bigDecimal1 = result.setScale(0, BigDecimal.ROUND_HALF_DOWN);
-                System.out.println("bigDecimal1:"+bigDecimal1);
+                // (과세 표준 - 과세표준 최소값) * 기본세율
+                BigDecimal result = subtract2.multiply(BigDecimal.valueOf(basicTaxRate1));
+                BigDecimal result2 = result.setScale(0, BigDecimal.ROUND_HALF_DOWN);
 
-                // bigDecimal1 + addTax
-                BigDecimal taxCalc = bigDecimal1.add(BigDecimal.valueOf(addTax));
+                // result2 + 추가세 = 산출세액
+                BigDecimal taxCalc = result2.add(BigDecimal.valueOf(addTax));
 
-                //산출세액 taxCalc - taxDeductionBig(세액공제)
-
+                //산출세액 - 세액공제
                 BigDecimal 결정세액 = taxCalc.subtract(taxDeductionBig);
-
-                System.out.println("결정세액"+결정세액);
-
                 DecimalFormat df = new DecimalFormat("#,##0");
                 String formattedTaxAmount = df.format(결정세액);
 
                 TaxResponse taxResponse = new TaxResponse();
                 taxResponse.set결정세액(formattedTaxAmount);
-                System.out.println("결정세액: " + formattedTaxAmount);
                 return ResponseEntity.ok(taxResponse);
             }
         }
