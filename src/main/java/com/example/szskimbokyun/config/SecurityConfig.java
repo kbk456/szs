@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer<HttpSecurity>::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(requests ->
-                        requests.requestMatchers("/","/3o3/**","/swagger/**","/v3/**","/hello").permitAll()
+                        requests.requestMatchers("/","/3o3/**","/swagger/**","/v3/**","/szs/**").permitAll()
                                 .requestMatchers(PathRequest.toH2Console()).permitAll()
                                 .anyRequest().authenticated()
                 )
