@@ -100,7 +100,6 @@ public class TaxController {
                 int basicTaxRate = taxInfo.get().getBasicTaxRate();
 
                 int taxBaseMin = taxInfo.get().getTaxBaseMin();
-                int taxBaseMax = taxInfo.get().getTaxBaseMax();
 
                 // 과세 표준 - taxBaseMin
                 BigDecimal subtract1 = taxBase.subtract(BigDecimal.valueOf(taxBaseMin));
@@ -111,7 +110,7 @@ public class TaxController {
 
                 System.out.println("subtract1"+subtract1);
                 // subtract1 * basicTaxRate1
-                BigDecimal result = subtract1.multiply(BigDecimal.valueOf(basicTaxRate1));
+                BigDecimal result = bigDecimal.multiply(BigDecimal.valueOf(basicTaxRate1));
                 System.out.println("Result: " + result); // 결과 출력
                 BigDecimal bigDecimal1 = result.setScale(0, BigDecimal.ROUND_HALF_DOWN);
                 System.out.println("bigDecimal1:"+bigDecimal1);
