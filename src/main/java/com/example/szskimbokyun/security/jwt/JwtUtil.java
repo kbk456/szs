@@ -1,7 +1,6 @@
 package com.example.szskimbokyun.security.jwt;
 
-
-import com.example.szskimbokyun.service.dto.CustomUserInfoDto;
+import com.example.szskimbokyun.domain.Member;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -37,7 +36,7 @@ public class JwtUtil {
      * @param member
      * @return Access Token String
      */
-    public String createAccessToken(CustomUserInfoDto member) {
+    public String createAccessToken(Member member) {
         return createToken(member, accessTokenExpTime);
     }
 
@@ -48,7 +47,7 @@ public class JwtUtil {
      * @param expireTime
      * @return JWT String
      */
-    private String createToken(CustomUserInfoDto member, long expireTime) {
+    private String createToken(Member member, long expireTime) {
         Claims claims = Jwts.claims();
         claims.put("userId", member.getUserId());
         claims.put("regNo", member.getRegNo());
@@ -56,7 +55,6 @@ public class JwtUtil {
 
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
-
 
         return Jwts.builder()
                 .setClaims(claims)

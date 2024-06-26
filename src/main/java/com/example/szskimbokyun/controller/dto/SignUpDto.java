@@ -10,7 +10,7 @@ import lombok.Setter;
 @Schema(description = "회원가입")
 @Getter
 @Setter
-public class SignUpMemberDto {
+public class SignUpDto {
 
     @NotNull
     @Schema(description = "사용자 아이디", required = true)

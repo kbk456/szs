@@ -1,6 +1,6 @@
 package com.example.szskimbokyun.security.jwt;
 
-import com.example.szskimbokyun.service.dto.CustomUserInfoDto;
+import com.example.szskimbokyun.domain.Member;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ class JwtUtilTest {
 
     @Test
     void testCreateAccessToken() {
-        CustomUserInfoDto member = new CustomUserInfoDto();
+        Member member = new Member();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
         member.setName("동탁 ");
@@ -43,7 +43,7 @@ class JwtUtilTest {
 
     @Test
     void testValidateToken() {
-        CustomUserInfoDto member = new CustomUserInfoDto();
+        Member member = new Member();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
         member.setName("동탁");
@@ -54,7 +54,7 @@ class JwtUtilTest {
 
     @Test
     void testGetUserId() {
-        CustomUserInfoDto member = new CustomUserInfoDto();
+        Member member = new Member();
         member.setUserId("1");
         member.setRegNo("921108-1582816");
         member.setName("동탁");
