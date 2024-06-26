@@ -84,6 +84,7 @@ public class TaxController {
             // 소득공제
             BigDecimal totalDeductionBig = new BigDecimal(totalDeduction.replaceAll(",",""));
 
+            // 종합소득금액 - 소득공제 = 과세표준
             BigDecimal subtract = totalIncomeBig.subtract(totalDeductionBig);
 
             // 과세표준
